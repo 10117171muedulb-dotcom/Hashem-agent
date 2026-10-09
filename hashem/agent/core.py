@@ -10,6 +10,7 @@ import json
 from typing import Any, Callable
 
 from ..utils.log import get_logger
+from . import planner
 from .context import AppContext
 from .memory import Session
 from .prompts import build_system
@@ -36,6 +37,28 @@ class AgentLoop:
         except Exception:  # noqa: BLE001 - a broken UI callback must not kill the loop
             log.debug("event callback raised", exc_info=True)
 
+    # ----------------------------------------------------- offline fallback
+    def _offline_fallback(self, session: Session, user_message: str) -> str:
+        """Execute the request with the deterministic local planner (no LLM)."""
+        self._emit({
+            "type": "token",
+            "text": "🤖 لا يوجد مزوّد ذكاء متصل (Ollama/سحابي) — أستخدم المخطط المحلي المجاني دون إنترنت.\n",
+        })
+        results: list[dict[str, Any]] = []
+        for step in planner.plan(user_message):
+            name = step["tool"]
+            arguments = step.get("arguments", {})
+            self._emit({"type": "tool_call", "name": name, "arguments": arguments})
+            if step.get("say"):
+                self._emit({"type": "token", "text": step["say"] + "\n"})
+            result = execute(self.context, name, arguments)
+            self._emit({"type": "tool_result", "name": name, "result": result})
+            results.append(result)
+        final_text = planner.offline_reply(user_message, results)
+        self._emit({"type": "final", "text": final_text})
+        session.add("assistant", final_text)
+        return final_text
+
     # ------------------------------------------------------------------- entry
     def run(self, session: Session, user_message: str) -> str:
         settings = self.context.settings
@@ -54,10 +77,8 @@ class AgentLoop:
             try:
                 result = self.context.provider.chat(messages, tools=schemas)
             except Exception as exc:  # noqa: BLE001
-                message = f"تعذر الاتصال بمزوّد الذكاء: {exc}"
-                self._emit({"type": "error", "message": message})
-                session.add("assistant", message)
-                return message
+                log.info("Provider unavailable (%s); using the offline planner", exc)
+                return self._offline_fallback(session, user_message)
 
             if result.has_tool_calls:
                 assistant_note = result.content or ""
