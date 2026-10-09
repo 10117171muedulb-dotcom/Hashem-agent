@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>هاشم — استوديو التصميم بالذكاء الاصطناعي</title>
+<link rel="stylesheet" href="/static/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><span class="logo">هـ</span><div><h1>هاشم</h1><p>استوديو التصميم الذكي</p></div></div>
+    <nav>
+      <button data-tab="chat" class="active">💬 المحادثة</button>
+      <button data-tab="video">🎬 فيديو موشن</button>
+      <button data-tab="image">🖼️ تصميم صورة</button>
+      <button data-tab="book">📚 تصميم كتاب</button>
+      <button data-tab="gallery">🗂️ المعرض</button>
+      <button data-tab="settings">⚙️ الإعدادات والتعلم</button>
+    </nav>
+    <div class="status" id="conn-status">…</div>
+  </aside>
+
+  <main class="main">
+    <!-- ============================= CHAT -->
+    <section id="tab-chat" class="tab active">
+      <div class="chat-log" id="chat-log"></div>
+      <div class="chat-input">
+        <input id="chat-text" placeholder="اطلب أي تصميم: فيديو، بوستر، كتاب… مثال: اصنع فيديو عن فوائد القهوة" autocomplete="off">
+        <button id="chat-send">إرسال ⬅</button>
+      </div>
+    </section>
+
+    <!-- ============================= VIDEO -->
+    <section id="tab-video" class="tab">
+      <h2>استوديو الفيديو</h2>
+      <div class="grid">
+        <div class="card">
+          <label>العنوان / الموضوع</label>
+          <input id="v-topic" placeholder="مثال: فوائد شرب الماء">
+          <label>النقاط (سطر لكل نقطة)</label>
+          <textarea id="v-points" rows="4" placeholder="يحسّن التركيز&#10;يرطب البشرة&#10;يعزز الطاقة"></textarea>
+          <div class="row">
+            <div><label>القالب</label><select id="v-template"></select></div>
+            <div><label>لوحة الألوان</label><select id="v-palette"></select></div>
+            <div><label>الموسيقى</label><select id="v-music"></select></div>
+          </div>
+          <label class="check"><input type="checkbox" id="v-audio" checked> تضمين الموسيقى</label>
+          <button class="primary" id="v-make">🎬 إنشاء الفيديو</button>
+        </div>
+        <div class="card preview" id="v-preview"><div class="empty">سيظهر الفيديو هنا</div></div>
+      </div>
+    </section>
+
+    <!-- ============================= IMAGE -->
+    <section id="tab-image" class="tab">
+      <h2>استوديو الصور</h2>
+      <div class="grid">
+        <div class="card">
+          <div class="row">
+            <div><label>النوع</label><select id="i-kind"></select></div>
+            <div><label>المنصة</label><select id="i-platform"></select></div>
+          </div>
+          <label>العنوان</label><input id="i-title" placeholder="عنوان التصميم">
+          <label>نص فرعي</label><input id="i-sub" placeholder="نص ثانوي (اختياري)">
+          <div class="row">
+            <div><label>لوحة الألوان</label><select id="i-palette"></select></div>
+            <div><label>نمط الخلفية</label><select id="i-style"></select></div>
+          </div>
+          <button class="primary" id="i-make">🖼️ تصميم الصورة</button>
+        </div>
+        <div class="card preview" id="i-preview"><div class="empty">ستظهر الصورة هنا</div></div>
+      </div>
+    </section>
+
+    <!-- ============================= BOOK -->
+    <section id="tab-book" class="tab">
+      <h2>استوديو الكتب</h2>
+      <div class="grid">
+        <div class="card">
+          <label>عنوان الكتاب</label><input id="b-title" placeholder="عنوان الكتاب">
+          <label>المؤلف</label><input id="b-author" placeholder="اسم المؤلف">
+          <label>المحتوى (Markdown)</label>
+          <textarea id="b-text" rows="8" placeholder="# الفصل الأول&#10;اكتب محتوى كتابك هنا…"></textarea>
+          <div class="row">
+            <div><label>الثيم</label><select id="b-theme"></select></div>
+            <div><label>الصيغ</label><input id="b-formats" value="pdf,html"></div>
+          </div>
+          <button class="primary" id="b-make">📚 إنشاء الكتاب</button>
+        </div>
+        <div class="card preview" id="b-preview"><div class="empty">روابط التصدير ستظهر هنا</div></div>
+      </div>
+    </section>
+
+    <!-- ============================= GALLERY -->
+    <section id="tab-gallery" class="tab">
+      <h2>المعرض <button id="g-refresh" class="ghost">↻ تحديث</button></h2>
+      <div class="gallery" id="gallery"></div>
+    </section>
+
+    <!-- ============================= SETTINGS -->
+    <section id="tab-settings" class="tab">
+      <h2>الإعدادات والتعلم الذاتي</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>مزوّد الذكاء</h3>
+          <label>النموذج الجاهز</label><select id="s-preset"></select>
+          <label>مفتاح API (اختياري)</label><input id="s-key" type="password" placeholder="اتركه فارغًا للنماذج المحلية">
+          <button class="primary" id="s-save">حفظ النموذج</button>
+          <div class="hint" id="s-note"></div>
+        </div>
+        <div class="card">
+          <h3>التعلم الذاتي</h3>
+          <pre id="s-learning" class="learn"></pre>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<script src="/static/app.js"></script>
+</body>
+</html>

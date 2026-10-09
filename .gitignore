@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+build/windows/obj/
+build/windows/*.spec
+dist/
+*.log
+.DS_Store
+scripts/_visual_check.py

@@ -1,0 +1,75 @@
+name: Build Windows EXE
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-exe:
+    name: Build Hashem Agent for Windows
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip wheel setuptools
+          pip install -r requirements.txt
+          pip install -r build/requirements-windows.txt
+
+      - name: Run test suite
+        run: python -m pytest -q
+
+      - name: Build the executable
+        run: python build/windows/build_exe.py
+
+      - name: Smoke-test the executable
+        run: |
+          cmd /c "dist\HashemAgent.exe --version --out version.json > smoke.txt 2>&1"
+          cmd /c "dist\HashemAgent.exe doctor --json --out doctor.json >> smoke.txt 2>&1"
+          type smoke.txt
+          type doctor.json
+        continue-on-error: true
+
+      - name: Upload executable artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: HashemAgent-Windows-x64
+          path: dist/*.exe
+          if-no-files-found: warn
+
+      - name: Upload smoke logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-logs
+          path: |
+            smoke.txt
+            version.json
+            doctor.json
+          if-no-files-found: ignore
+
+      - name: Publish release asset
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.0
+          files: dist/*.exe
+          generate_release_notes: true
