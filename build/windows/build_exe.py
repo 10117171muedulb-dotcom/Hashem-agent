@@ -66,13 +66,14 @@ def main() -> int:
         return 1
 
     icon = ROOT / "hashem" / "assets" / "icon.ico"
+    # Console subsystem: shows live logs + the studio URL, returns proper exit
+    # codes (needed for CI smoke tests), and still auto-opens the browser.
     args = [
         str(ROOT / "hashem" / "__main__.py"),
         "--name=HashemAgent",
         "--onefile",
         "--noconfirm",
         "--clean",
-        "--windowed",
         f"--distpath={ROOT / 'dist'}",
         f"--workpath={ROOT / 'build' / 'windows' / 'obj'}",
         f"--specpath={ROOT / 'build' / 'windows'}",
