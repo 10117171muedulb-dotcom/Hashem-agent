@@ -173,6 +173,10 @@ class Renderer:
             try:
                 transformed, position = place(tile, layer, self.canvas, state)
                 if state.opacity < 0.999:
+                    # IMPORTANT: copy first — ``transformed`` may be the very same
+                    # cached tile object, and mutating its alpha would poison the
+                    # cache for all subsequent frames.
+                    transformed = transformed.copy()
                     alpha = transformed.split()[-1].point(lambda v: int(v * state.opacity))
                     transformed.putalpha(alpha)
                 frame.alpha_composite(transformed, position)

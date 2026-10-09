@@ -92,6 +92,21 @@ def test_render_frame_non_trivial(small_project):
     assert array.std() > 1.0  # not a flat frame
 
 
+def test_static_tile_cache_not_poisoned(small_project):
+    """Regression: opacity fading must not mutate the shared cached tile.
+
+    Previously the enter-fade called ``putalpha`` on the cached tile object, so a
+    low-opacity early frame permanently dimmed every later frame.
+    """
+    renderer = Renderer(small_project)
+    list(renderer.frames())  # populate the cache across the fade-in
+    text_layer = small_project.scenes[0].layers[0]
+    key = (0, text_layer.id, text_layer.kind, text_layer.text, round(text_layer.font_size, 1))
+    cached = renderer._tile_cache.get(key)
+    assert cached is not None, "static text tile should be cached"
+    assert int(np.asarray(cached)[..., 3].sum()) > 1000, "cached tile must stay fully opaque"
+
+
 def test_transition_blend():
     from hashem.motion.render import apply_transition
     from PIL import Image
