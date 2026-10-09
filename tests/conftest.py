@@ -4,14 +4,15 @@ from __future__ import annotations
 
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-# Keep tests hermetic: redirect the app data + workspace into a temp tree.
-os.environ["HASHEM_WORKSPACE"] = os.path.join(os.environ.get("TMPDIR", "/tmp"), "hashem_test_ws")
+# Keep tests hermetic and cross-platform: redirect the workspace into a temp tree.
+os.environ["HASHEM_WORKSPACE"] = os.path.join(tempfile.gettempdir(), "hashem_test_ws")
 
 
 @pytest.fixture()
