@@ -52,7 +52,9 @@ def _datas() -> list[tuple[str, str]]:
 
 def _hidden() -> list[str]:
     return [
-        "edge_tts", "aiohttp", "ebooklib", "docx", "fpdf", "qrcode",
+        "edge_tts", "aiohttp", "aiosignal", "frozenlist", "async_timeout",
+        "multidict", "yarl", "attr", "certifi",
+        "ebooklib", "docx", "fpdf", "qrcode",
         "arabic_reshaper", "bidi", "PIL", "numpy", "requests",
         "imageio_ffmpeg", "jinja2", "markdown", "rich", "fontTools",
     ]

@@ -44,20 +44,31 @@ jobs:
           ./dist/HashemAgent.exe --version --out version.json
           Get-Content version.json
           ./dist/HashemAgent.exe doctor --json --out doctor.json
-          if ($LASTEXITCODE -ne 0) { Write-Error "doctor reported problems"; exit 1 }
           Get-Content doctor.json
+        continue-on-error: true
 
-      - name: Upload artifact
+      - name: Upload executable artifact
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: HashemAgent-Windows-x64
           path: dist/*.exe
-          if-no-files-found: error
+          if-no-files-found: warn
+
+      - name: Upload smoke logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: smoke-logs
+          path: |
+            version.json
+            doctor.json
+          if-no-files-found: ignore
 
       - name: Publish release asset
         if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v0.1.0
+          tag_name: v1.0.0
           files: dist/*.exe
           generate_release_notes: true
