@@ -41,10 +41,10 @@ jobs:
 
       - name: Smoke-test the executable
         run: |
-          ./dist/HashemAgent.exe --version --out version.json
-          Get-Content version.json
-          ./dist/HashemAgent.exe doctor --json --out doctor.json
-          Get-Content doctor.json
+          cmd /c "dist\HashemAgent.exe --version --out version.json > smoke.txt 2>&1"
+          cmd /c "dist\HashemAgent.exe doctor --json --out doctor.json >> smoke.txt 2>&1"
+          type smoke.txt
+          type doctor.json
         continue-on-error: true
 
       - name: Upload executable artifact
@@ -61,6 +61,7 @@ jobs:
         with:
           name: smoke-logs
           path: |
+            smoke.txt
             version.json
             doctor.json
           if-no-files-found: ignore
